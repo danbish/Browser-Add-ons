@@ -1,4 +1,4 @@
-Browser-Add-ons
-===============
+Quail JS Firefox Browser Add-on
+==================================
 
-A collection of browser add-ons that have been created, modified or copied for future use.  Feel free to utilize them within the boundaries of the license for the respective add-on.  Each add-on will have its own branch. 
+Firefox Add-on with Quail JS at its core.  Quail JS is used under the MIT license.

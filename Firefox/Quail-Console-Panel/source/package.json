@@ -1,0 +1,9 @@
+{
+  "name": "quail-console-panel",
+  "title": "Quail Console Panel Addon",
+  "id": "jid1-pAGPoXVOJ9sixw",
+  "description": "Adds a panel to the firefox console that allows accessibility testing using Quail JS library",
+  "author": "",
+  "license": "MPL 2.0",
+  "version": "0.2"
+}

@@ -1,0 +1,148 @@
+<html>
+    <head>
+        <title>Panel Please</title>
+        <link href='quailStyle.css' rel='stylesheet'/>
+        <link href='../libs/codemirror/codemirror.css' rel='stylesheet'/>
+        <link href='../libs/codemirror/foldgutter.css' rel='stylesheet'/>
+
+        <script src="../libs/jquery-2.1.1.min.js"></script>
+        <script src='../libs/codemirror/codemirror.js'></script>
+        <script src='../libs/codemirror/xml.js'></script>
+        <script src='../libs/codemirror/javascript.js'></script>
+        <script src='../libs/codemirror/css.js'></script>
+        <script src='../libs/codemirror/htmlmixed.js'></script>
+        <script src='../libs/codemirror/foldcode.js'></script> 
+        <script src='../libs/codemirror/foldgutter.js'></script> 
+        <script src='../libs/codemirror/comment-fold.js'></script> 
+        <script src='../libs/codemirror/brace-fold.js'></script> 
+        <script src='../libs/codemirror/xml-fold.js'></script>  
+        <script src='../libs/codemirror/active-line.js'></script> 
+        <script src='../libs/codemirror/searchcursor.js'></script>
+        <script src='../libs/accessibilityTests.js'></script>
+        <script src="quailPanel.js"></script>
+
+    </head> 
+
+<body>
+    <div class="loading"><img src="imgs/loader.gif" alt="loading..." height="200" width="200"/></div>
+    <div class="content">
+        <div class="tab-nav">
+            <ul class="tab-links">
+                <li class="active"><span href="tabAll">Select Tests</span></li>
+                <li class="custom-test"><span href="tabCustomTest">Customize</span></li>
+                <li class="results"><span href="tabResults">Results</span></li>
+                <li class="search-DOM"><span href="tabDOM">DOM Hierarchy</span></li>
+                <li class="html-tab"><span href="tabHTML">View HTML</span></li>
+            </ul>
+        </div>
+        <div class="tab-divider">
+            <div class="tabAll tab-div active">
+                <span class="menu-button submit" title="Run Selected Tests">Run Test</span>
+                <span class="menu-button clear" title="Clear Test Selection">Clear Selection</span>
+                <span class="menu-button select-all" title="Select All Tests">Select All Tests</span>
+            </div>
+            <div class="tabResults tab-div">
+                <span class="results-totals total">Total Failed:</span>
+                <span class="results-totals total-severe">Severe:</span>
+                <span class="results-totals total-moderate">Moderate:</span>
+                <span class="results-totals total-suggestion">Suggestions:</span>
+                <span class="menu-button report">Generate Report</span>
+                <span class="menu-button disable-img" title="Hide images on page to help with visibility">Hide Images</span>
+            </div>
+            <div class="tabCustomTest tab-div">
+                <span class="menu-button submit" title="Run Selected Tests">Run Test</span>
+            </div>
+            <div class="tabDOM tab-div">
+                <span class="menu-button report">Generate Report</span>
+                <span class="menu-button disable-img" title="Hide images on page to help with visibility">Hide Images</span>
+            </div>
+            <div class="tabHTML tab-div">
+                <span class="menu-button report">Generate Report</span>
+            </div>
+        </div>
+        <div class="tab-content">
+            <div id="tabAll" class="tab active">
+                <div class="list-block tag-color">
+                    <span class="list-label">Colors</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                <div class="list-block tag-link">
+                    <span class="list-label">Links</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                <div class="list-block tag-image tag-imagemap">
+                    <span class="list-label">Images</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                <div class="list-block tag-form">
+                    <span class="list-label">Forms</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                <div class="list-block tag-table">
+                    <span class="list-label">Tables</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                <div class="list-block tag-javascript">
+                    <span class="list-label">Javascript</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                <div class="list-block tag-objects">
+                    <span class="list-label">Objects</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                <div class="list-block tag-content">
+                    <span class="list-label">Other Content</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                <div class="list-block tag-document">
+                    <span class="list-label">Document</span><span class="list-button">Select:<span class="box"></span></span>
+                    <ul class="collapsible-list">
+                    </ul>
+                </div>
+                
+            </div>
+            <div id="tabCustomTest" class="tab">
+                <div class="list-block">
+                    <label for="inputCustomTest">jQuery Selector for Custom Scope</label>
+                    <input type="text" class="custom-input" id="inputCustomTest" placeholder="jQuery selector for scope of QUAIL testing. Default 'body'">
+                </div>
+            </div>
+            <div id="tabResults" class="tab">
+                <div class="list-block">
+                    <span class="list-label">Severe Failures</span>
+                    <ul class="results-list severe">
+                    </ul>
+                </div>
+                <div class="list-block">
+                    <span class="list-label">Moderate Failures</span>
+                    <ul class="results-list moderate">
+                    </ul>
+                </div>
+                <div class="list-block">
+                    <span class="list-label">Suggestions</span>
+                    <ul class="results-list suggestion">
+                    </ul>
+                </div>
+            </div>
+            <div id="tabDOM" class="tab">
+                <span class="test-name"></span>
+                <div class="list-block">
+                    <ul class="dom-list">
+                    </ul>
+                </div>
+            </div>
+            <div id="tabHTML" class="tab">
+                <div id="code-html"></div>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>

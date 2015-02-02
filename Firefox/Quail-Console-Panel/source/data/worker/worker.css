@@ -1,0 +1,23 @@
+.quail-test-tooltip {
+    position:absolute;
+    z-index:999;
+    left:-9999px;
+    background-color:#dedede;
+    padding:1px;
+    border:1px solid #fff;
+    width:250px;
+    border-radius: 3px;
+    opacity: 0.9;
+    display: none;
+}
+
+.quail-test-tooltip p {
+    margin:0;
+    padding:0;
+    color:#fff;
+    background-color:#111;
+    padding:2px 7px;
+    text-transform: none;
+    font-size: 11px;
+    border-bottom: 1px solid #fff
+}

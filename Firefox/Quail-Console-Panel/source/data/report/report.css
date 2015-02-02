@@ -1,0 +1,236 @@
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f5f5f5;
+}
+
+:focus {
+    outline: none;
+}
+
+a#options {
+    display: inline-block;
+    width: 100px;
+    margin-left: 120px;
+    margin-top: -1px;
+    text-align: center;
+    text-decoration: none;
+    line-height: 22px;
+    background-color: #fff;
+    border: 1px solid #555;
+    border-top: 0;
+    color: #555;
+    transition:all linear 0.1s;
+    border-radius: 2px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    box-shadow: 0px 11px 5px -10px #888888;
+    z-index: 1000;
+    font-weight: bold;
+    padding: 3px 0;
+}
+
+a#options:hover, a#options:active {
+    color: #111;
+}
+
+#options-apply {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid #555;
+    border-radius: 2px;
+    margin-top: 5px;
+    background-color: #fafafa;
+    cursor: pointer;
+}
+#options-apply:hover {
+    border-color: #111;
+    background-color: #fefefe;
+}
+
+#options-menu {
+    position: fixed;
+    right: 20px;
+    top: -200px;
+    transition: all linear 0.2s;
+}
+
+#options-menu.open {
+    top: -1px;
+}
+
+#options-menu ul {
+    list-style-type: none;
+    background-color: #fff;
+    border: 1px solid #555;
+    padding: 10px 15px;
+    margin: 0;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    box-shadow: 0px 2px 5px 1px #888888;
+    z-index: 900;
+}
+#options-menu ul li {
+    text-align: left;
+    padding: 1px 2px;
+    width: 200px;
+    color: #333;
+    background-color: #fff;
+}
+#options-menu ul li.border {
+    border-bottom: 1px solid #777;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+}
+#options-menu ul li.apply {
+    text-align: center;
+}
+
+#options-menu select {
+    padding: 3px 5px;
+    margin-left: 45px;
+}
+
+#options-menu input {
+    margin-left: 45px;
+}
+
+#options-menu .label {
+    float: left;
+}
+
+h1 {
+    margin-left: 13px;
+}
+
+h2 {
+    margin-left: 13px;
+}
+h2 span {
+    margin-left: 3px;
+    padding: 2px;
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
+
+.results-totals {
+    display: inline-block;
+    width: 22.5%;
+    text-align: center;
+    background-color: #2d4671;
+    color: white;
+    margin: 0 .8%;
+    margin-bottom: 10px;
+    padding: 5px 0;
+    border-radius: 2px;
+}
+
+.results-totals.total-severe {
+    background-color: #AA3939;
+}
+.results-totals.total-moderate {
+    background-color: #AA7A39;
+}
+.results-totals.total-suggestion {
+    background-color: #448F30;
+}
+
+.report-content {
+    padding: 0;
+    margin: 0;
+}
+
+.border-box {
+    padding: 3px 0.8% 20px 0.8%;
+    border-top: 6px solid #333;
+    background-color: #fafafa;
+    color: #333;
+}
+
+.border-box.severe {
+    /*border-color: #FFAAAA;*/
+    border-color: #AA3939;
+}
+
+.border-box.moderate {
+    /*border-color: #FFDBAA;*/
+    border-color: #AA7A39;
+}
+
+.border-box.suggestion {
+    /*border-color: #9ED68F;*/
+    border-color: #448F30;
+}
+
+.border-box.all {
+    border-color: #2d4671;
+}
+
+.title {
+    font-size: 20px;
+    margin-top: 5px;
+    margin-left: 10px;
+    text-transform: capitalize;
+}
+
+.description {
+    margin: 0 10px;
+    padding: 0 0 6px 0;
+    border-bottom: 
+}
+
+.test-block {
+    margin: 0 15px;
+    font-size: 13px;
+    padding: 0 8px 0 8px;
+}
+
+.test-block h4 {
+    border-top: 1px solid #333;
+    padding-top: 2px;
+    margin: 0;
+    margin-top: 2px;
+}
+
+.test-block h4 .totalnum {
+    display: inline-block;
+    padding: 2px 2px;
+    margin-right: 10px;
+    border-radius: 2px;
+    border: 2px solid #333;
+}
+
+.test-block h4 .testid {
+    font-weight: normal;
+    text-decoration: underline;
+}
+
+.test-block p {
+    margin: 5px 0 0 5px;
+}
+
+.test-block p span {
+    display: inline-block;
+    border-left: 1px solid #333;
+    margin-left: 3px;
+    padding-left: 3px;
+    text-transform: uppercase;
+}
+
+.test-block.passed h4 .totalnum {
+    display: none;
+}
+
+
+@media print {
+
+    #options-menu {
+        display: none;
+    }
+
+    .test-block {
+        font-weight: normal;
+    }
+}

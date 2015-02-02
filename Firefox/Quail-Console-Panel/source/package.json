@@ -5,5 +5,5 @@
   "description": "Adds a panel to the firefox console that allows accessibility testing using Quail JS library",
   "author": "",
   "license": "MPL 2.0",
-  "version": "0.2"
+  "version": "0.3"
 }

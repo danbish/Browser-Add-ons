@@ -19,7 +19,7 @@ var oTestWorker =
 {
     oAccessibilityTests: {},
     oTestResults: {},
-    oActiveBorders: {},
+    oActiveBorders: {aTestList: [], oElementList: {}, iTotal: 0, oToolTipList: {}}, // aTestLists contains the active tests, oHLPos contains an object containing a list of the current positions of highlights
     workerInitListeners: function()
     {
         var worker = this;
@@ -41,13 +41,13 @@ var oTestWorker =
         });
 
         //Turns on borders and tooltips for the elements that failed testID
-        self.port.on( "testOn", function( sTestId, sSeverity )
+        self.port.on( "highlightOn", function( aTestIds )
         {
-            worker.applyBorders( sTestId, sSeverity );
+            worker.applyBorders( aTestIds );
         });
 
         // Turns off the borders and tooltips for elements that failed testID
-        self.port.on( "testOff", function( sTestId )
+        self.port.on( "highlightOff", function( sTestId )
         {
             worker.removeBorders( sTestId );
         });
@@ -100,9 +100,6 @@ var oTestWorker =
             accessibilityTests : oRunTests,
             testFailed : function( event )
             {
-                // Attributes for when the tool tip needs to be on
-                $( event.element ).attr( 'quail-test-highlights', '0' );
-                $( event.element ).attr( 'quail-test-use', 'off' );
                 oSeverity[ event.testName ] = event.severity;
                 worker.oTestResults.results[ event.testName ].elements.push( event.element );
                 worker.oTestResults.totals[ event.severity ]++;
@@ -114,50 +111,55 @@ var oTestWorker =
             }
         });
     },
-    getDomHierarchy: function( sTestId )
+    getDomHierarchy: function( aTestIds )
     {
-        var oResults = this.oTestResults.results[sTestId];
         var $oElement, oDomPositions;
-        oDomPositions = {};
-        // Iterates through and grabs parents for each element, puts them in oDomPositions 
-        for( i = 0; i < oResults.elements.length; i++ )
+        oDomPositions = {};     
+        for( j = 0; j < aTestIds.length; j++ )
         {
-            $oElement = $(oResults.elements[i]);
-            oDomPositions[i] = [];
-            var sEleEntry = '';
-            if( $oElement.prop( 'nodeName' ) )
+            var sTestId = aTestIds[j];
+            var oResults = this.oTestResults.results[sTestId];
+            oDomPositions[sTestId] = {};
+            // Iterates through and grabs parents for each element, puts them in oDomPositions 
+            for( i = 0; i < oResults.elements.length; i++ )
             {
-                sEleEntry = $oElement.prop( 'nodeName' ).toLowerCase( );
-            }
-            if( $oElement.prop( 'className' ) )
-            {
-                sEleEntry += '.' + $oElement.prop( 'className' ).replace( / /g, '.' );
-            }
-            if( $oElement.attr( 'id' ) )
-            {
-                sEleEntry += '#' + $oElement.attr( 'id' );
-            }
-            if( sEleEntry !== '' )
-            {
-                oDomPositions[i].push( sEleEntry );
-            }
-            $oElement.parents().not( 'html' ).each( function() 
-            {
-                var thisEle = this;
-                var sEntry = thisEle.tagName.toLowerCase();
-                if( thisEle.className )
+                $oElement = $(oResults.elements[i]);
+                oDomPositions[sTestId][i] = [];
+                var sEleEntry = '';
+                if( $oElement.prop( 'nodeName' ) )
                 {
-                    sEntry += "." + thisEle.className.replace(/ /g, '.');
+                    sEleEntry = $oElement.prop( 'nodeName' ).toLowerCase( );
                 }
-                if( thisEle.id )
+                if( $oElement.prop( 'className' ) )
                 {
-                    sEntry += "#" + thisEle.id;
+                    sEleEntry += '.' + $oElement.prop( 'className' ).replace( / /g, '.' );
                 }
-                oDomPositions[i].push( sEntry );
-            });
-            oDomPositions[i].reverse();
+                if( $oElement.attr( 'id' ) )
+                {
+                    sEleEntry += '#' + $oElement.attr( 'id' );
+                }
+                if( sEleEntry !== '' )
+                {
+                    oDomPositions[sTestId][i].push( sEleEntry );
+                }
+                $oElement.parents().not( 'html' ).each( function() 
+                {
+                    var thisEle = this;
+                    var sEntry = thisEle.tagName.toLowerCase();
+                    if( thisEle.className )
+                    {
+                        sEntry += "." + thisEle.className.replace(/ /g, '.');
+                    }
+                    if( thisEle.id )
+                    {
+                        sEntry += "#" + thisEle.id;
+                    }
+                    oDomPositions[sTestId][i].push( sEntry );
+                });
+                oDomPositions[sTestId][i].reverse();
+            }
         }
-        self.port.emit( "foundInDom", sTestId, oDomPositions );
+        self.port.emit( "foundInDom", aTestIds, oDomPositions );
     },
     getHTMLCode: function( oDomPosition )
     {
@@ -234,117 +236,123 @@ var oTestWorker =
             },
         });   
     },
-    applyBorders: function( sTestId, sSeverity )
+    applyBorders: function( aTestIds )
     {
-        var oResults = this.oTestResults.results[sTestId];
-        var $oElement;
-        // Iterates through elements that failed test
-        for( i = 0; i < oResults.elements.length; i++ )
+        for( j = 0; j < aTestIds.length; j++ )
         {
-            $oElement = $( oResults.elements[i] );
-            // Updates attr describing how many tests are actively showing borders for this element
-            var iNumTestsOn = parseInt( $oElement.attr( 'quail-test-highlights' ) );
-            iNumTestsOn++;
-            $oElement.attr( 'quail-test-highlights',iNumTestsOn.toString() );
-            // Adds border with appropiate color
-            switch( sSeverity )
+            var sTestId = aTestIds[j];
+            var oResults = this.oTestResults.results[sTestId];
+            var oElement, $oElement, oPos;
+            var iInvisTotal = 0;
+            var worker = this;
+            // Sets test to active
+            worker.oActiveBorders.aTestList.push(sTestId);
+            // Iterates through elements that failed test
+            for( i = 0; i < oResults.elements.length; i++ )
             {
-                case 'severe':
-                    $oElement.css( { "outline": "2px dashed red", "padding": "3px" } );
-                    break;
-                case 'moderate':
-                    $oElement.css( { "outline": "2px dashed orange", "padding": "3px" } );
-                    break;
-                case 'suggestion':
-                    $oElement.css( { "outline": "2px dashed lightgreen", "padding": "3px" } );
-                    break;
+                oElement = oResults.elements[i];
+                $oElement = $(oElement);
+                // Check to make sure element is visible
+                if( !$oElement.is(":visible") )
+                {
+                    iInvisTotal = iInvisTotal + 1;
+                }
+                // Get position of element (offset to document)
+                else
+                {
+                    var iHeight, iWidth, iEleId;
+                    var bMakeNew = true;
+                    oPos = $oElement.offset();
+                    iHeight = $oElement.outerHeight();
+                    iWidth = $oElement.outerWidth();
+                    oPos.top = oPos.top - (iHeight - $oElement.innerHeight());
+                    oPos.top = oPos.top - 6;
+                    oPos.left = oPos.left - 6;
+                    // Check to make see if a new highlight needs to be made
+                    for( var index in worker.oActiveBorders.oElementList )
+                    {
+                        if( oPos.top === worker.oActiveBorders.oElementList[index].top && oPos.left === worker.oActiveBorders.oElementList[index].left )
+                        {
+                            bMakeNew = false;
+                            iEleId = index;
+                        }
+                    }
+                    if( bMakeNew )
+                    {
+                        worker.oActiveBorders.iTotal = worker.oActiveBorders.iTotal + 1;
+                        worker.oActiveBorders.oElementList['quail-ele-id-' + worker.oActiveBorders.iTotal] = oPos;
+                        $('body').append( "<div class='quail-test-overlay-highlight severe' id='quail-ele-id-" + worker.oActiveBorders.iTotal + "'></div>" );
+                        $('#quail-ele-id-' + worker.oActiveBorders.iTotal).css({"left": oPos.left + 'px',"top": oPos.top + 'px', "height": iHeight + 'px', "width": iWidth + 'px'});
+                        worker.oActiveBorders.oToolTipList['quail-ele-id-' + worker.oActiveBorders.iTotal] = [sTestId];
+                    }
+                    else
+                    {
+                        worker.oActiveBorders.oToolTipList[iEleId].push(sTestId);
+                    }
+                }
             }
-            // Updates test tooltip attribute that describes which tests element needs to display tooltips for
-            var sTooltipTests = $oElement.attr( 'quail-test-tooltip' );
-            if( sTooltipTests === undefined  || sTooltipTests === '' )
-            {
-                sTooltipTests = sTestId;
-            }
-            else
-            {
-                sTooltipTests = sTooltipTests + ' ' + sTestId;
-            }
-            $oElement.attr( 'quail-test-tooltip', sTooltipTests );
-            // Notifies that tooltips for this element are active
-            $oElement.attr( 'quail-test-use','on' );
         }
-
-        this.initToolTips();
-    },
-    removeBorders: function( sTestId )
-    {
-        var oResults = this.oTestResults.results[sTestId];
-        var $oElement;
-        for( i = 0; i < oResults.elements.length; i++ )
+        if ( iInvisTotal > 0 && $(' .quail-test-alert ').length === 0 )
         {
-            $oElement = $( oResults.elements[i] );
-            // Updates test highlights tooltip which holds number of tests showing borders on this element
-            var iNumTestsOn = parseInt( $oElement.attr( 'quail-test-highlights' ) );
-            if( iNumTestsOn > 0)
+            $('body').append("<div class='quail-test-alert-background'></div>");
+            $('body').append("<div class='quail-test-alert'><span>Quail Console Notification</span> " + iInvisTotal + " total elements were not visible and therefore not highlighted<br><br>(Click to remove this notification)</div>");
+            $( '.quail-test-alert' ).click( function()
             {
-                iNumTestsOn--;
-            }
-            // Checks to make sure other tests aren't still active, if so leaves borders on
-            if( iNumTestsOn === 0 )
+                $(this).remove();
+                $('.quail-test-alert-background').remove();
+            });
+        }
+        worker.initToolTips();
+    },
+    removeBorders: function( aTestIds )
+    {
+        var worker = this;
+        for( i = 0; i < aTestIds.length; i++ )
+        {
+            var sTestId = aTestIds[i];
+            var index = worker.oActiveBorders.aTestList.indexOf(sTestId);
+            if( index === -1 ) { console.log("Error: test Id not found in border array"); }
+            worker.oActiveBorders.aTestList.splice(index,1);
+            for( var iEleId in worker.oActiveBorders.oToolTipList )
             {
-                $oElement.css( { "outline": "", "padding": "" } );
-                $oElement.attr( 'quail-test-use', 'off' );
+                var iTestIndex = worker.oActiveBorders.oToolTipList[iEleId].indexOf(sTestId)
+                if( iTestIndex >= 0 )
+                {
+                    worker.oActiveBorders.oToolTipList[iEleId].splice( iTestIndex, 1 );
+                    if( worker.oActiveBorders.oToolTipList[iEleId].length === 0 )
+                    {
+                        $('#' + iEleId).remove();
+                        delete worker.oActiveBorders.oElementList[iEleId];
+                        delete worker.oActiveBorders.oToolTipList[iEleId];
+                        worker.oActiveBorders.iTotal = worker.oActiveBorders.iTotal - 1;
+                    }
+                }
             }
-            $oElement.attr( 'quail-test-highlights', iNumTestsOn.toString() );
-            // Takes tests out of test tooltip attr and removes the test id being turned off
-            var aTestTooltips = $oElement.attr( 'quail-test-tooltip' ).split( ' ' );
-            var index = $.inArray( sTestId, aTestTooltips );
-            aTestTooltips.splice( index, 1 );
-            $oElement.attr( 'quail-test-tooltip', aTestTooltips.join( ' ' ) );
         }
     },
     initToolTips: function()
     {
         var worker = this;
         // Checks for tools tips being on, and then updates tooltip div html to hold tooltip info, and displays
-        $( '[quail-test-use="on"]' ).mouseenter( function()
+        $( '.quail-test-overlay-highlight' ).mouseenter( function()
         {
             $( 'body' ).append( '<div class="quail-test-tooltip"></div>' );
             $( '.quail-test-tooltip' ).html( '' );
-            var aTestTooltips = $( this ).attr( 'quail-test-tooltip' );
-            if( aTestTooltips !== '' )
+            var sEleId = $( this ).attr( 'id' );
+            var aTestTooltips = worker.oActiveBorders.oToolTipList[sEleId];
+            for( i = 0; i < aTestTooltips.length; i++ )
             {
-                // Means tooltip needs to be shown
-                // So takes list of test ids residing in the attr and splits into array
-                aTestTooltips = aTestTooltips.split( ' ' );
-                for( i = 0; i < aTestTooltips.length; i++ )
+                // Adds each descritption
+                var sTestId = aTestTooltips[i];
+                var sDescription = sTestId;
+                if( 'title' in worker.oAccessibilityTests[sTestId] )
                 {
-                    // Adds each descritption
-                    var sTestId = aTestTooltips[i];
-                    var sDescription = sTestId;
-                    if( 'title' in worker.oAccessibilityTests[sTestId] )
-                    {
-                        sDescription = worker.oAccessibilityTests[sTestId].title.en;
-                    }
-                    $( '.quail-test-tooltip' ).append('<p>' + sDescription + '</p>');
+                    sDescription = worker.oAccessibilityTests[sTestId].title.en;
                 }
-                $( '.quail-test-tooltip' ).show();
+                $( '.quail-test-tooltip' ).append('<p>' + sDescription + '</p>');
             }
-        // On mousemove places tooltip div at mouse position, accounting for screen position so it's always showing
-        }).mousemove( function( mousePos )
-        {
-            iLeft = mousePos.pageX + 15;
-            iTop = mousePos.pageY + 15;
-            if( iLeft > ( $( window ).width() - 200 ) )
-            {
-                iLeft -= 270;
-            }
-            if( iTop > ( $( window ).height() - $( '.quail-test-tooltip' ).height() ) )
-            {
-                iTop -= $( '.quail-test-tooltip' ).height() + 20;
-            }
-
-            $( '.quail-test-tooltip' ).css({ left: iLeft, top: iTop});
+            $( '.quail-test-tooltip' ).css({ left: 3 });
+            $( '.quail-test-tooltip' ).show();
         // On mouseleave hides the tooltip
         }).mouseleave( function()
         {

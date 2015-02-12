@@ -1959,7 +1959,7 @@ var quailTests =
     }
   },
   "frameTitlesNotEmpty": {
-    "selector": "frame:not(frame[title]), frame[title=], iframe:not(iframe[title]), iframe[title=]",
+    "selector": "frame:not(frame[title]), frame[title=''], iframe:not(iframe[title]), iframe[title='']",
     "tags": [
       "deprecated",
       "frame"

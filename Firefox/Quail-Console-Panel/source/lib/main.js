@@ -114,18 +114,24 @@ var oQuailAddon =
                 console.log('Submitting data');
                 this.oWorker.port.emit( "init", this.aActiveList, this.oAccessibilityTests, aGuideline, sCustomSelector );
                 break;
-            case 'testOn':
+            case 'highlightOn':
             // Turn on borders for the selected test, gotten from data
-                var sTestId = oData[0];
-                var sSeverity = oData[1];
-                this.aActiveList[sTestId] = true; //Keeps tabs on what tests are active so they can be disabled if panel is closed
-                this.oWorker.port.emit( "testOn", sTestId, sSeverity );
+                var aTestIds = oData[0];
+                for( i = 0; i < aTestIds.length; i++ )
+                {
+                    this.aActiveList[aTestIds[i]] = true; //Keeps tabs on what tests are active so they can be disabled if panel is closed
+                    console.log("Turn on test for " + aTestIds[i]);
+                }
+                this.oWorker.port.emit( "highlightOn", aTestIds );
                 break;
-            case 'testOff':
+            case 'highlightOff':
             // Turn off borders for the selected test
-                var sTestId = oData[0];
-                delete this.aActiveList[sTestId];
-                this.oWorker.port.emit( "testOff", sTestId );
+                var aTestIds = oData[0];
+                for( i = 0; i < aTestIds.length; i++ )
+                {
+                    delete this.aActiveList[aTestIds[i]];
+                }
+                this.oWorker.port.emit( "highlightOff", aTestIds );
                 break;
             case 'findInDom':
             // Get a list of the elements that failed the selected tests and their position in the DOM
@@ -157,7 +163,7 @@ var oQuailAddon =
                         // Create temporary worker for the report script
                         var worker2 = tab.attach(
                         {
-                            contentScriptFile: [data.url( 'lib/jquery-2.1.1.min.js' ), data.url( 'report/report.js' )]
+                            contentScriptFile: [data.url( 'libs/jquery-2.1.1.min.js' ), data.url( 'report/report.js' )]
                         });
                         // Once script is ready, send it the necessary data to populate the report
                         worker2.port.on( "reportReady", function()

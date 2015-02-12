@@ -19,6 +19,7 @@
         <script src='../libs/codemirror/active-line.js'></script> 
         <script src='../libs/codemirror/searchcursor.js'></script>
         <script src='../libs/accessibilityTests.js'></script>
+        <script src='../libs/accessibilityStandards.js'></script>
         <script src="quailPanel.js"></script>
 
     </head> 
@@ -28,29 +29,26 @@
     <div class="content">
         <div class="tab-nav">
             <ul class="tab-links">
-                <li class="active"><span href="tabAll">Select Tests</span></li>
-                <li class="custom-test"><span href="tabCustomTest">Customize</span></li>
-                <li class="results"><span href="tabResults">Results</span></li>
-                <li class="search-DOM"><span href="tabDOM">DOM Hierarchy</span></li>
+                <li class="active"><span href="tabAll">Test</span></li>
+                <li class="results"><span href="tabResults">Report</span></li>
+                <li class="search-DOM"><span href="tabDOM">Inspect</span></li>
                 <li class="html-tab"><span href="tabHTML">View HTML</span></li>
             </ul>
         </div>
         <div class="tab-divider">
             <div class="tabAll tab-div active">
                 <span class="menu-button submit" title="Run Selected Tests">Run Test</span>
-                <span class="menu-button clear" title="Clear Test Selection">Clear Selection</span>
-                <span class="menu-button select-all" title="Select All Tests">Select All Tests</span>
+                <span id="wcag" class="list-button" title="WCAG Related Tests">WCAG Tests<span class="box"></span></span>
+                <span id="five" class="list-button" title="508 Related Tests">508 Tests<span class="box"></span></span>
+                <span id="misc" class="list-button" title="Misc tests">Misc tests<span class="box"></span></span>
             </div>
             <div class="tabResults tab-div">
-                <span class="results-totals total">Total Failed:</span>
+                <span class="results-totals total">Total Elements Failed:</span>
                 <span class="results-totals total-severe">Severe:</span>
                 <span class="results-totals total-moderate">Moderate:</span>
                 <span class="results-totals total-suggestion">Suggestions:</span>
                 <span class="menu-button report">Generate Report</span>
                 <span class="menu-button disable-img" title="Hide images on page to help with visibility">Hide Images</span>
-            </div>
-            <div class="tabCustomTest tab-div">
-                <span class="menu-button submit" title="Run Selected Tests">Run Test</span>
             </div>
             <div class="tabDOM tab-div">
                 <span class="menu-button report">Generate Report</span>
@@ -62,82 +60,24 @@
         </div>
         <div class="tab-content">
             <div id="tabAll" class="tab active">
-                <div class="list-block tag-color">
-                    <span class="list-label">Colors</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                <div class="list-block tag-link">
-                    <span class="list-label">Links</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                <div class="list-block tag-image tag-imagemap">
-                    <span class="list-label">Images</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                <div class="list-block tag-form">
-                    <span class="list-label">Forms</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                <div class="list-block tag-table">
-                    <span class="list-label">Tables</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                <div class="list-block tag-javascript">
-                    <span class="list-label">Javascript</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                <div class="list-block tag-objects">
-                    <span class="list-label">Objects</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                <div class="list-block tag-content">
-                    <span class="list-label">Other Content</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                <div class="list-block tag-document">
-                    <span class="list-label">Document</span><span class="list-button">Select:<span class="box"></span></span>
-                    <ul class="collapsible-list">
-                    </ul>
-                </div>
-                
-            </div>
-            <div id="tabCustomTest" class="tab">
                 <div class="list-block">
-                    <label for="inputCustomTest">jQuery Selector for Custom Scope</label>
-                    <input type="text" class="custom-input" id="inputCustomTest" placeholder="jQuery selector for scope of QUAIL testing. Default 'body'">
+                    <label for="inputCustomScope">jQuery Selector for Custom Scope</label>
+                    <input type="text" class="custom-input" id="inputCustomScope" placeholder="jQuery selector for scope of QUAIL testing. Default 'body'">
                 </div>
+                <!-- <div class="list-block">
+                    <label for="inputCustomTest">Custom javascript test</label>
+                    <textarea rows="4" cols="50" id="inputCustomTest" class="custom-input" placeholder="A User created access. test function: Takes element and returns true if element passes and false if it fails"></textarea>
+                </div>     -->           
             </div>
             <div id="tabResults" class="tab">
-                <div class="list-block">
-                    <span class="list-label">Severe Failures</span>
-                    <ul class="results-list severe">
-                    </ul>
+                <div class="results-init">
+                    Test results reported here
                 </div>
-                <div class="list-block">
-                    <span class="list-label">Moderate Failures</span>
-                    <ul class="results-list moderate">
-                    </ul>
-                </div>
-                <div class="list-block">
-                    <span class="list-label">Suggestions</span>
-                    <ul class="results-list suggestion">
-                    </ul>
+                <div class="results-list">
+                    <div data-standard="WCAG-F13"><a class="results-button left" href="http://quailjs.org/#/guidelines/wcag">WCAG-F13</a><span class="results-button left hl">Highlight</span><span class="results-button right inspect">Inspect</span><p>Failure of Success Criterion 1.1.1 and 1.4.1 due to having a text alternative that does not include information that is conveyed by color differences in the image<span class="results-num-ele">114 elements</span></p></div>
                 </div>
             </div>
             <div id="tabDOM" class="tab">
-                <span class="test-name"></span>
-                <div class="list-block">
-                    <ul class="dom-list">
-                    </ul>
-                </div>
             </div>
             <div id="tabHTML" class="tab">
                 <div id="code-html"></div>

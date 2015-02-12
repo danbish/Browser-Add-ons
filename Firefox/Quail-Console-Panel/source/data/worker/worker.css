@@ -1,7 +1,8 @@
 .quail-test-tooltip {
-    position:absolute;
-    z-index:999;
+    position:fixed;
+    z-index:9999;
     left:-9999px;
+    top: 3px;
     background-color:#dedede;
     padding:1px;
     border:1px solid #fff;
@@ -20,4 +21,65 @@
     text-transform: none;
     font-size: 11px;
     border-bottom: 1px solid #fff
+}
+
+.quail-test-overlay-highlight {
+    position: absolute;
+    z-index: 9998;
+    top: 0;
+    left: 0px;
+    height: 50px;
+    width: 50px;
+    display: inline-block;
+    border: 4px solid #1A3F85;
+    background-color: #325698;
+    opacity: 0.3;
+    padding: 2px;
+}
+
+.quail-test-overlay-highlight:hover {
+    background-color: #7692C5;
+}
+
+.quail-test-overlay-highlight.severe {
+    background-color: red;
+    border-color: darkred;
+}
+.quail-test-overlay-highlight.severe:hover {
+    opacity: 0.6;
+}
+
+.quail-test-alert-background {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: black;
+    opacity: 0.25;
+    z-index: 10000;
+}
+.quail-test-alert {
+    text-transform: none;
+    color: black;
+    font-size: 12px;
+    font-family: sans-serif;
+    display: inline-block;
+    width: 200px;
+    min-height: 80px;
+    background-color: #E0E0E0;
+    border: 1px solid #888888;
+    padding: 10px;
+    opacity: 1;
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 10001;
+    text-align: center;
+}
+.quail-test-alert span {
+    display: block;
+    background-color: #b3b3b3;
+    font-weight: bold;
 }

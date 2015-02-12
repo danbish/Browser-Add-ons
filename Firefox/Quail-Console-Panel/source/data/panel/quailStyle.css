@@ -19,7 +19,6 @@ body {
     width: 100%;
     background-color: #aaa;
     font-size: 11px;
-    border-spacing: 0px;
 }
 
 :focus {
@@ -76,28 +75,6 @@ body {
     background-color: darkred;
 }
 
-.menu-button.select-all {
-    color: #0D61B3;
-}
-.menu-button.select-all:hover {
-    color: #084c8d;
-    border-color: #666;
-}
-.menu-button.select-all:active {
-    color: #0D61B3;
-}
-
-.menu-button.clear {
-    color: #0D61B3;
-}
-.menu-button.clear:hover {
-    color: #084c8d;
-    border-color: #666;
-}
-.menu-button.clear:active {
-    color: #0D61B3;
-}
-
 .menu-button.disable-img {
     color: #333;
 }
@@ -122,6 +99,38 @@ body {
 }
 .menu-button.report:active {
     background-color: #152D55;
+}
+
+.list-button {
+    margin: 4px 10px 4px 4px;
+    display: inline-block;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition:all linear 0.1s;
+    float: right;
+    color: #0D61B3;
+    border-radius: 3px;
+    background-color: #F6F6F6;
+    border: 1px solid #C6C6C6;
+}
+
+.list-button .box {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 8px;
+    margin-top: 2px;
+    outline: 1px solid #C6C6C6;
+    border: 1px solid #f6f6f6;
+}
+
+.list-button:hover {
+    border-color: #666;
+    color: #084c8d;
+}
+
+.list-button.active  .box{
+    background-color: #084c8d;
 }
  
 /*----- Tab Links -----*/
@@ -165,10 +174,6 @@ ul.tab-links {
 }
 
 .tab-links li.search-DOM span {
-    display: none;
-}
-
-.tab-links li.results span {
     display: none;
 }
 
@@ -229,93 +234,13 @@ ul.tab-links {
    display:block;
 }
 
-/*----- Collapsible Lists -----*/
+/*----- Content Containers -----*/
 .list-block {
     border: 1px solid #dcdcdc;
     padding: 3px;
     padding-right: 20px;
-    margin: 8px;
+    margin: 2px 1px 2px 2px;
     background-color: #fff;
-}
-
-.collapsible-list {
-    display: none;
-    list-style-type: none;
-    margin: 2px 0;
-}
-
-.collapsible-list li {
-    cursor: pointer;
-    padding: 4px 0 4px 22px;
-    border-top: 1px solid #dcdcdc;
-    background: #fff;
-    color: #000;
-    border-left: 3px solid #fff;
-}
-
-.collapsible-list li:hover {
-    background-color: #f6f6f6;
-}
-.collapsible-list li.active {
-    background-color: #f6f6f6;
-    border-left: 3px solid darkblue;
-}
-
-.list-li-label {
-    display: inline-block;
-    padding: 2px 16px;
-    margin: 1px 5px;
-    background-color: #2D4671;
-    color: #fff;
-    border-radius: 2px;
-}
-
-.list-label {
-    display: inline-block;
-    cursor: pointer;
-    margin: 3px 0 3px 20px;
-    padding: 5px 0 3px 27px;
-    background: url('imgs/plus.png') no-repeat left;
-    background-size: 20px;
-    width: 120px;
-}
-
-.list-label.open {
-    background: url('imgs/minus.png') no-repeat left;
-    background-size: 20px;
-}
-
-.list-button {
-    margin-top: 3px;
-    margin-left: 10px;
-    display: inline-block;
-    padding: 4px 6px;
-    cursor: pointer;
-    transition:all linear 0.1s;
-    float: right;
-    color: #0D61B3;
-    border-radius: 3px;
-    background-color: #F6F6F6;
-    border: 1px solid #C6C6C6;
-}
-
-.list-button .box {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    margin-left: 8px;
-    margin-top: 2px;
-    outline: 1px solid #C6C6C6;
-    border: 1px solid #f6f6f6;
-}
-
-.list-button:hover {
-    border-color: #666;
-    color: #084c8d;
-}
-
-.list-button.active  .box{
-    background-color: #084c8d;
 }
 
 /*----- Results Tab -----*/
@@ -343,45 +268,35 @@ ul.tab-links {
     color: #448F30;
 }
 
-.results-list li .results-totals {
-    margin-left: 0px;
-}
-
 .results-list {
-    list-style-type: none;
-    margin: 2px 0;
-    display: none;
 }
 
-.results-list li {
-    cursor: pointer;
-    padding: 4px 0 4px 19px;
-    border-top: 1px solid #dcdcdc;
-    border-left: 3px solid #fff;
+.results-list div {
+    padding: 10px 4px;
+    margin: 2px 2px 2px 1px;
+    border: 1px solid #dcdcdc;
     background: #fff;
     color: #000;
     min-height: 26px;
+    margin-top: 4px;
+}
+.results-list div p {
+    padding: 0;
+    margin: 0;
+    margin-left: 8px;
+    display: inline-block;
+    max-width: calc(100% - 250px); 
 }
 
-.results-list li:hover {
-    background-color: #f6f6f6;
-}
-.results-list li.active {
-    background-color: #f6f6f6;
-    border-left: 3px solid darkblue;
-}
-
-.results-list li .results-totals {
-    display: block;
-    float: left;
-    margin: 3px 0;
-    padding: 3px 5px;
-    margin-right: 8px;
-    border: 1px solid #999;
-    border-radius: 3px;
+.results-num-ele {
+    padding: 1px;
+    margin: 3px 0px;
+    margin-left: 8px;
+    background-color: grey;
+    border-radius: 2px;
 }
 
-.results-list li .show-dom {
+.results-button {
     display: block;
     float: right;
     padding: 4px 6px;
@@ -392,13 +307,33 @@ ul.tab-links {
     border-radius: 3px;
     border: 1px solid #AAA;
     background-color: #F6F6F6;
+    margin: 0 3px;
 }
-.results-list li .show-dom:hover {
+.results-button:hover {
     border-color: #666;
     color: #000;
 }
+.results-button.left {
+    float: left;
+}
 
-/*----- Custom Tests Tab -----*/
+a.results-button {
+    text-align: center;
+    width: 85px;
+}
+
+.results-init {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.hl.active {
+    border-color: red;
+    color: darkred;
+}
+
+/*----- Tests Tab -----*/
 
 .custom-input {
     font-style: Courier;
@@ -412,7 +347,7 @@ ul.tab-links {
     border: 1px solid blue;
 }
 
-#tabCustomTest label {
+#tabAll label {
     display: block;
     font-weight: 700;
     margin: 3px 5px 5px 5px;

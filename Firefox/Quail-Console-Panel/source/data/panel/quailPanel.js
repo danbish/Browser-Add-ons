@@ -2,10 +2,14 @@
 
 var oQuailPanel = 
 {
-    bStored: false,
+    tempDescript: 'This is a temporary descript to be used to fill up standard descriptions before I transcribe the whole shebang',
     // oAccessibilityTests holds the object containing the list of quail accessibility tests
     //that will be filled using an ajax call
     oAccessibilityTests: {},
+    oAccessibilityStandards: {},
+    oReportData: {},
+    // Holds the test ids relevent to each standard, WCAG, five (508), and other misc ones
+    oTestIds : { wcag: [], five: [], misc: [] },
     bFirstMessage: true,
     mainPort: {},
     /* initiatePanel:
@@ -34,18 +38,10 @@ var oQuailPanel =
             thisP.handleCollapsibleList( $( this ), event );
         } );
         // Controls the 'Select' button within the tests tab, a simple toggle feature
-        $( '.list-button' ).on( 'click', function(  )
+        $( '.list-button' ).on( 'click', function()
         {
-            var $thisList = $( this ).next( 'ul' );
-            if(  $( this ).toggleClass( 'active' ).hasClass( 'active' )  )
-            {
-                $thisList.children(  ).addClass( 'active' );
-            }
-            else
-            {
-                $thisList.children(  ).removeClass( 'active' );
-            }
-        } );
+            $( this ).toggleClass( 'active' );
+        });
         // Menu button controls, selects all, clears all selections or submits the tests to handler
         $( '.menu-button' ).on( 'click', function(  ) 
         {
@@ -61,82 +57,42 @@ var oQuailPanel =
         // Once main.js has prepared for the panel to be displayed, ajax call to get
         //the object of quail accessibility tests from server at url
         var thisP = this;
-        // var url = 'http://mockups/accessibilityTests.json';
-        // $.ajax( {
-        //     url: url,
-        //     dataType: 'json',
-        //     data: {},
-        //     success: function( oData )
-        //     {
-        //         thisP.oAccessibilityTests = oData;
-        //     },
-        //     error: function( oData )
-        //     {
-        //         console.error( 'Failed to load JSON object' );
-        //     },
-        //     complete: function( oData )
-        //     {
-        //         // Upon completion populate the tests tab of the panel with the tests
-        //         //and then let the handler know it can display now
-        //         thisP.populateTestsTab(  );
-        //         $( '.content' ).show(  );
-        //         thisP.messageAddon(  "accessTests", [oData.responseJSON]  );
-        //     }
-        // } );
         thisP.oAccessibilityTests = quailTests;
-        thisP.populateTestsTab(  );
+        thisP.oAccessibilityStandards = accessStandards;
+        thisP.populateTestIds();
         $( '.content' ).show(  );
         thisP.messageAddon(  "accessTests", [thisP.oAccessibilityTests]  );
     },
 
-    /* populateTestsTab:
-    * Populates the test tab upon recieving the list of test from the ajax call
-    * Each list itme displays the test id and a description of the test
-    * They are placed into list blocks based on the tag of the test
-    */
-    populateTestsTab: function(  )
+    populateTestIds: function()
     {
-        var thisP = this;
-        var oAccessibilityTests = this.oAccessibilityTests;
-        // iterates through the accessibility tests object and creates a list element for each one, in their respective list block
-        for( var prop in oAccessibilityTests )
+        var panel = this;
+        for(var sTestId in panel.oAccessibilityTests)
         {
-            var sId, sDescription, aTags, i;
-            sId = prop;
-            aTags = oAccessibilityTests[prop].tags;
-            sDescription = sId;
-            if(  'description' in oAccessibilityTests[prop]  )
+            var thisTest = panel.oAccessibilityTests[sTestId];
+            if( 'guidelines' in thisTest )
             {
-                sDescription = oAccessibilityTests[prop].description.en;
-            }
-            $( '#tabAll .list-block' ).each(  function( e )
-            {
-                for(  i = 0; i < aTags.length; i++ )
+                var bPushed = false;
+                if( 'wcag' in thisTest.guidelines )
                 {
-                    var $oListBlock = $( this );
-                    if(  $oListBlock.hasClass( 'tag-'+aTags[i] )  )
-                    {
-                        $oListBlock.find( '.collapsible-list' ).append( '<li id="' + sId + '"><strong>' + sId + ' : </strong>'+ sDescription + '</li>' );
-                        return false;
-                    }
+                    panel.oTestIds.wcag.push(sTestId);
+                    bPushed = true;
                 }
-            } );
+                if( '508' in thisTest.guidelines )
+                {
+                    panel.oTestIds.five.push(sTestId);
+                    bPushed = true;
+                }
+                if( !bPushed )
+                {
+                    panel.oTestIds.misc.push(sTestId);
+                }
+            }
+            else
+            {
+                panel.oTestIds.misc.push(sTestId);
+            }
         }
-        // Upon clicking on a list item within the tests tab, selects the list itme
-        // ( This selection highlights the item to let it know its selected, and adds it to the guidelines array )
-        $( '.collapsible-list li' ).on( 'click', function(  )
-        {
-            console.log( 'select test1' );
-            thisP.selectListItem( $( this ) );
-        } );
-        // Catches anchors within the collapsible list and makes them open new tab in browser instead of opening page in panel
-        // Necessary because of links within the test descriptions
-        $( '.collapsible-list li a' ).on(  'click', function( event )
-        {
-            event.preventDefault(  );
-            var sPageDestination = $( this ).attr( 'href' );
-            thisP.messageAddon(  "pageOpen", [sPageDestination]  );
-        } );
     },
 
     /* populateResultsTab:
@@ -154,64 +110,73 @@ var oQuailPanel =
         $( '.results-totals.total-severe' ).html( 'Severe: ' + oResults.totals.severe );
         $( '.results-totals.total-moderate' ).html( 'Moderate: ' + oResults.totals.moderate );
         $( '.results-totals.total-suggestion' ).html( 'Suggestions: ' + oResults.totals.suggestion );
-        
         // Populates results list with each test in results object that has at least one failure
-        $( '.results-list' ).html( " " );
+        $( '.results-list' ).html( "" );
         for( var sTestId in oResults.results )
         {
             var thisTest = oResults.results[sTestId];
+            var bInWcag = false;
+            var bIn508 = false;
+            var sWcag, s508;
+            var bShowWcag = $('#wcag').hasClass( 'active' );
+            var bShow508 = $('#five').hasClass( 'active' );
             if(  thisTest.elements.length >= 1  )
             {
-                var sDescription = sTestId;
-                if(  'description' in this.oAccessibilityTests[sTestId]  )
+                var testDetails = thisP.oAccessibilityTests[sTestId];
+                if( thisP.oTestIds.wcag.indexOf(sTestId) !== -1 && bShowWcag )
                 {
-                    sDescription = this.oAccessibilityTests[sTestId].description.en;
+                    bInWcag = true;
+                    for( var version in testDetails.guidelines.wcag )
+                    {
+                        sWcag = 'WCAG-';
+                        sWcag = sWcag + testDetails.guidelines.wcag[version].techniques[0];                        
+                    }
+                    thisP.addResultsItem( sTestId, thisTest, sWcag );
                 }
-                $( '.results-list.' + oSeverity[sTestId] ).append( '<li id="' + sTestId + '"><span class="results-totals total-' + oSeverity[sTestId] + '">' + thisTest.elements.length + '</span><span class="show-dom">Find in DOM</span><strong>' + sTestId + ': </strong>'+ sDescription + '</li>' );
+                if( thisP.oTestIds.five.indexOf(sTestId) !== -1 &&  bShow508 )
+                {
+                    bIn508 = true;
+                    s508 = '508-';
+                    s508 = s508 + testDetails.guidelines['508'][0];
+                    thisP.addResultsItem( sTestId, thisTest, s508 );
+                }
             }
-            
         }
-        $( '.loading' ).hide(  );
+        $( '.loading' ).hide();
+        $( '.results-init' ).hide();
+        $( '.results-list' ).show();
         // Change/remove current tab to active
         $( '.tab-links .results' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
         // Shows the results tab and switches to it
-        $( 'li.results span' ).slideDown(  function(  )
-        {
-            // Show results tab
-            $( '.tab-div.tabResults' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
-            $( '#tabResults' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
-        } );
+        $( '.tab-div.tabResults' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
+        $( '#tabResults' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
         // When a list item in the results list is click it toggles the borders in the active tab, through messaging to the handler
-        $( '.results-list li' ).on( 'click', function(  event  )
+        $( '.hl' ).on( 'click', function(  event  )
         {
-            var sTestId = $( this ).attr( 'id' );
-            // If the find in Dom button is clicked it makes active if inactive
-            if(  $( event.target ).hasClass( 'show-dom' )  )
-            {
-                if(  !$( this ).hasClass( 'active' )  )
-                {
-                    $( this ).addClass( 'active' );
-                    thisP.messageAddon(  "testOn", [sTestId, oSeverity[sTestId]]  );
-                }
-            }
-            else if(  $( this ).toggleClass( 'active' ).hasClass( 'active' )  )
-            {
-                thisP.messageAddon(  "testOn", [sTestId, oSeverity[sTestId]]  );
+            var $button = $(this);
+            var sStandard = $button.parent().attr('data-standard');
+            var aTestIds = thisP.oReportData[sStandard].aTestIds;
+            if( $button.toggleClass('active').hasClass('active') )
+            {   
+                thisP.messageAddon(  "highlightOn", [aTestIds]  );
             }
             else
             {
-                thisP.messageAddon(  "testOff", [sTestId]  );
+                thisP.messageAddon( "highlightOff", [aTestIds] );
             }
-        } );
-        // When Find in DOM button is clicked sends message to handler to find all elements of that test within the DOM
-        $( '.show-dom' ).on(  'click', function(  ) 
+             
+        });
+        //When Find in DOM button is clicked sends message to handler to find all elements of that test within the DOM
+        $( '.results-button.inspect' ).on(  'click', function(  ) 
         {
-            var sTestId = $( this ).parent( 'li' ).attr( 'id' );
-            thisP.messageAddon(  "findInDom", [sTestId]  );
+            var $button = $(this);
+            var sStandard = $button.parent().attr('data-standard');
+            var aTestIds = thisP.oReportData[sStandard].aTestIds;
+            thisP.messageAddon(  "findInDom", [aTestIds]  );
             $( '.loading' ).show(  );
         } );
         // Catches anchors within the results list and makes them open new tab in browser instead of opening page in panel
-        $( '.results-list li a' ).on(  'click', function( e )
+        $( '.results-list a' ).on(  'click', function( e )
         {
             e.preventDefault(  );
             var sPageDestination = $( this ).attr( 'href' );
@@ -231,10 +196,34 @@ var oQuailPanel =
     *within the html tab
     * oDomPositions is an array of arrays which holde the dom hierarchies
     */
-    populateDomHierarchyTab: function( sTestId,oDomPositions )
+    populateDomHierarchyTab: function( aTestIds,oDomPositions )
     {
         var thisP = this;
-        $( '.loading' ).hide(  );
+        for( var j = 0; j < aTestIds.length; j++ )
+        {
+            var sTestId = aTestIds[j];
+            // Populate tab with oDomPositions
+            $( '#tabDOM' ).append( '<span class="test-name">Test Name: <strong>' + sTestId + '</strong></span>' );
+            $( '#tabDOM' ).append( '<div class="list-block"><ul class="dom-list" id="list-' + j + '"></ul></div>' );
+            for( var index in oDomPositions[sTestId] )
+            {
+                oDomPositions[sTestId][index].splice( 1,1 );
+                $( '.dom-list#list-' + j ).append( '<li test-id="' + sTestId + '" test-index="' + index + '">' + oDomPositions[sTestId][index].join( ' > ' ) + '<span class="show-code">View HTML</span></li>' );
+            }
+            // event listener to show the html tab
+            $( '.show-code' ).on( 'click', function(  )
+            {
+                var i = $( this ).parent(  ).attr( 'test-index' );
+                var test = $( this ).parent().attr( 'test-id' );
+                $( '.tab-links .html-tab' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
+                $( 'li.html-tab span' ).slideDown(  function(  )
+                {
+                    $( '#tabHTML' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
+                    $( '.tab-div.tabHTML' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
+                    thisP.messageAddon(  "getCode", [ oDomPositions[test][i] ]  ); //signals main.js to get the html code for the element described at poisiton i in the domPositions object
+                } );
+            } );
+        }
         // Change/remove current tab to active
         $( '.tab-links .search-DOM' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
         // Shows the DOM tab and switches to it
@@ -242,27 +231,8 @@ var oQuailPanel =
         {  
             // Show tab
             $( '#tabDOM' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
-            // Populate tab with oDomPositions
-            $( '.test-name' ).html( 'Test Name: <strong>' + sTestId + '</strong>' );
-            $( '.dom-list' ).html( '' );
-            for( var index in oDomPositions )
-            {
-                oDomPositions[index].splice( 1,1 );
-                $( '.dom-list' ).append( '<li test-id="' + sTestId + '" test-index="' + index + '">' + oDomPositions[index].join( ' > ' ) + '<span class="show-code">View HTML</span></li>' );
-            }
-            // event listener to show the html tab
-            $( '.show-code' ).on( 'click', function(  )
-            {
-                var i = $( this ).parent(  ).attr( 'test-index' );
-                $( '.tab-links .html-tab' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
-                $( 'li.html-tab span' ).slideDown(  function(  )
-                {
-                    $( '#tabHTML' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
-                    $( '.tab-div.tabHTML' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
-                    thisP.messageAddon(  "getCode", [oDomPositions[i]]  ); //signals main.js to get the html code for the element described at poisiton i in the domPositions object
-                } );
-            } );
-        } );
+        });
+        $( '.loading' ).hide(  );
     },
 
     /*
@@ -316,7 +286,7 @@ var oQuailPanel =
                     break;
                 case 'accessTests': //tests are being recieved from main addon script
                     thisP.oAccessibilityTests = oData[0];
-                    thisP.populateTestsTab(  );
+                    thisP.populateTestIds(  );
                     $( '.content' ).show(  );
                     break;
                 case 'results': //got back test results can now populate results page
@@ -351,27 +321,14 @@ var oQuailPanel =
         // Submit button, gathers selected rules into the guideline and sends signal to main.js to begin testing
         if(  $button.hasClass( 'submit' )  )
         {
-            var aGuideline = [];
             var sCustomSelector = 'body';
-            this.gatherSelected(  $( '#tabAll' ), aGuideline  );
+            var aGuideline = thisP.gatherSelected();
             if(  $( '#inputCustomTest' ).val(  ).length > 0  )
             {
                 sCustomSelector = $( '#inputCustomTest' ).val(  );
             }
             thisP.messageAddon(  "submit" , [aGuideline, sCustomSelector]  );
             $( '.loading' ).show(  );
-        }
-        // Select all tests
-        else if(  $button.hasClass( 'select-all' )  )
-        {
-            $( '#tabAll li' ).addClass( 'active' );
-            $( '#tabAll .list-button' ).addClass( 'active' );
-        }
-        // Clear the entirety of the selection @TODO: Maybe clear scope as well?
-        else if(  $button.hasClass( 'clear' )  )
-        {
-            $( '#tabAll li' ).removeClass( 'active' );
-            $( '#tabAll .list-button' ).removeClass( 'active' );
         }
         else if(  $button.hasClass( 'disable-img' )  )
         {
@@ -395,55 +352,61 @@ var oQuailPanel =
         event.preventDefault(  );
     },
     /*
-    * toggles the collapsible lists to display or hide their content when the label is clicked
-    */
-    handleCollapsibleList: function( $listLink, event )
-    {
-        var $thisList
-        if(  $listLink.parent(  ).parent(  ).is( '#tabResults' )  ) //tests to see if its in results tab or other, kind of jerryrigged this, closest(  ) didn't work :( 
-        {
-            $thisList = $listLink.next( 'ul' );
-        }
-        else
-        {
-            $thisList = $listLink.next(  ).next( 'ul' );
-        }
-        // Show/Hide list 
-        $thisList.toggleClass( 'open' ).toggle(  );
-        // Toggles label to be + or -
-        $listLink.toggleClass( 'open' );
-    },
-    /*
     * BELOW HERE ARE SOME HELPER FUNCTIONS TO MAKE LIFE EASIER
-    * selectListItem: called when a li element within the collapsible list is clicked, toggles 'active' class on it
     * gatherSelected: help function for the submit test function, finds all the 'active' list elements and adds them to an array
+    * addResultsItem: determines the standards relevant to a test and places them in the correct item on the report tab
     * messageAddon: takes the given handle and content and sends them to the main addon in the correct format
     * receiveMessage: instead of calling handleMessage directly the mainPort's receive message event listener calls this function
     *               necessary because it didn't like me called handleMessage directly for some reason
     */
-    selectListItem: function( $listItem )
+    gatherSelected: function()
     {
-        console.log( 'select test2' );
-        $listItem.toggleClass( 'active' );
-        var $listBlock = $listItem.parent(  ).parent(  );
-        $listBlock.find( '.list-button' ).removeClass( 'active' );
-    },
-    gatherSelected: function(  list, guideline  )
-    {
-        var total = 0;
-        if(  typeof guideline === 'undefined'  )
+        var aGuidelineTemp = [];
+        var panel = this;
+        $('.list-button').each(  function( i )
         {
-            guideline = [];
-        }
-        list.find( 'li' ).each(  function( i )
-        {
-            if(  $( this ).hasClass( 'active' ) )
+            var sStandard = '';
+            var $tests = $(this);
+            if(  $tests.hasClass( 'active' ) )
             {
-                total++;
-                guideline.push( $( this ).attr( 'id' ) );
+                sStandard = $tests.attr( 'id' );
+                aGuidelineTemp = aGuidelineTemp.concat( panel.oTestIds[sStandard] );
             }
         } );
-        return total;
+        var oSeen = {};
+        var aGuideline = [];
+        var iCount = 0;
+        for( var i = 0; i < aGuidelineTemp.length; i++ )
+        {
+            var sItem = aGuidelineTemp[i];
+            if( oSeen[sItem] !== 1 )
+            {
+                oSeen[sItem] = 1;
+                aGuideline[iCount] = sItem;
+                iCount++;
+            }
+        }
+        return aGuideline;
+    },
+    addResultsItem: function( sTestId, thisTest, sStandard )
+    {
+        var $listItem = $( '.results-list div[data-standard="' + sStandard + '"]' );
+        var thisP = this;
+        if( $listItem.length )
+        {
+            thisP.oReportData[sStandard].iTotal = thisP.oReportData[sStandard].iTotal + thisTest.elements.length;
+            thisP.oReportData[sStandard].aTestIds.push(sTestId);
+            $listItem.children('.results-num-ele').html( thisP.oReportData[sStandard].iTotal + ' elements' );
+        }
+        else
+        {
+            thisP.oReportData[sStandard] = { iTotal: thisTest.elements.length, aTestIds: [sTestId] };
+            var sNewListItem = '<div data-standard="' + sStandard + '">';
+            sNewListItem = sNewListItem + '<a class="results-button left" href="http://quailjs.org/#/guidelines/wcag">' + sStandard + '</a>';
+            sNewListItem = sNewListItem + '<span class="results-button left hl">Highlight</span><span class="results-button right inspect">Inspect</span>';
+            sNewListItem = sNewListItem + '<p>' + thisP.oAccessibilityStandards[sStandard] + '<span class="results-num-ele">' + thisTest.elements.length + ' elements</span></p></div>'
+            $( '.results-list' ).append( sNewListItem );
+        }
     },
     messageAddon: function(  sMessageHandle, oData  )
     {

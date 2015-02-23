@@ -408,3 +408,30 @@ a.results-button {
 .cm-highlight {
     background-color: yellow;
 }
+
+/*----- Alert ------*/
+.panel-alert {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 24px;
+    font-size: 14px;
+    padding-top: 5px;
+    padding-right: 5px;
+    color: white;
+    background-color: #BF0303;
+    font-weight: bold;
+    text-align: center;
+    z-index: 100001;
+}
+.panel-alert .close {
+    background: url('imgs/x.png') center center;
+    background-size: 14px;
+    width: 14px;
+    height: 14px;
+    float: right;
+    margin-top: 3px;
+    cursor: pointer;
+}

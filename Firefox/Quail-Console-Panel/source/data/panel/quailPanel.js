@@ -232,7 +232,7 @@ var oQuailPanel =
             // Show tab
             $( '#tabDOM' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
         });
-        $( '.loading' ).hide(  );
+        $( '.loading' ).hide();
     },
 
     /*
@@ -305,6 +305,10 @@ var oQuailPanel =
                     var aEndLine = oData[2];
                     this.populateHtmlTab( sCode,aStartLine,aEndLine );
                     break;
+                case 'alert':
+                    var sAlert = oData[0];
+                    thisP.alertPanel( sAlert );
+                    break;
                 default: //incorrect handler, sends a message to main addon to log this message
                     thisP.messageAddon( "log", ['No matching message handle'] );
             }
@@ -323,9 +327,9 @@ var oQuailPanel =
         {
             var sCustomSelector = 'body';
             var aGuideline = thisP.gatherSelected();
-            if(  $( '#inputCustomTest' ).val(  ).length > 0  )
+            if(  $( '#inputCustomScope' ).val(  ).length > 0  )
             {
-                sCustomSelector = $( '#inputCustomTest' ).val(  );
+                sCustomSelector = $( '#inputCustomScope' ).val(  );
             }
             thisP.messageAddon(  "submit" , [aGuideline, sCustomSelector]  );
             $( '.loading' ).show(  );
@@ -350,6 +354,17 @@ var oQuailPanel =
         $tab.parent( 'li' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
  
         event.preventDefault(  );
+    },
+    alertPanel: function( sAlert )
+    {
+        $( '.loading' ).hide();
+        var $alert = $( '.panel-alert' );
+        $alert.html( sAlert + '<span class="close"></span>');
+        $( '.panel-alert .close' ).on('click', function()
+        {
+            $alert.slideUp();
+        });
+        $alert.slideDown();
     },
     /*
     * BELOW HERE ARE SOME HELPER FUNCTIONS TO MAKE LIFE EASIER

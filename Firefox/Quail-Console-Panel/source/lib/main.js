@@ -34,6 +34,7 @@ var oQuailAddon =
     panelPort: {},
     oWorker: {},
     bInitWorker: true,
+    bTestable: false, // only true when tab is a testable web page, set in worker refresh
     //List of tests that are currently being highlighted
     aActiveList: {},
     //Holds accessibility tests object, recieved from panel ajax request
@@ -86,6 +87,11 @@ var oQuailAddon =
             console.log( "Got Code" );
             thisP.messagePanel( "gotCode", [sCode, aStartLine, aEndLine] );
         });
+        // Need to set up an alert in the panel to alert user of important info
+        thisP.oWorker.port.on( "panelAlert", function( sAlert )
+        {
+            thisP.messagePanel( "alert", [sAlert] );
+        });
         thisP.bInitWorker = false;
     },
     handleMessage: function( oMessage )
@@ -109,10 +115,18 @@ var oQuailAddon =
                 break;
             case 'submit':
             // Submit test button was triggered in panel, takes list of desired guidelines and submits test to worker script to be completed
-                var aGuideline = oData[0];
-                var sCustomSelector = oData[1];
-                console.log('Submitting data');
-                this.oWorker.port.emit( "init", this.aActiveList, this.oAccessibilityTests, aGuideline, sCustomSelector );
+                if( thisP.bTestable )
+                {
+                    var aGuideline = oData[0];
+                    var sCustomSelector = oData[1];
+                    console.log('Submitting data');
+                    thisP.oWorker.port.emit( "init", thisP.aActiveList, thisP.oAccessibilityTests, aGuideline, sCustomSelector );
+                }
+                else
+                {
+                    console.log('Cannot test: non-viable webpage');
+                    thisP.messagePanel( "alert", ["Could not complete test on current web page: not valid web page"]);
+                }
                 break;
             case 'highlightOn':
             // Turn on borders for the selected test, gotten from data
@@ -195,10 +209,21 @@ var oQuailAddon =
         // Send message through the mainPort to the panel script
         this.mainPort.postMessage(oMessage);
     },
-    workerRefresh: function()
+    workerRefresh: function(tab)
     {
         var thisO = this;
         thisO.aActiveList = {};
+        if( tab !== 0 )
+        {
+            if( tab.url.indexOf("about:") === -1 )
+            {
+                thisO.bTestable = true;
+            }
+            else
+            {
+                thisO.bTestable = false;
+            }
+        }
         // if a worker doesn't exist, create a new worker
         if(thisO.bInitWorker)
         {
@@ -252,7 +277,7 @@ const quailPanel = Class(
     onReady: function()
     {
         oQuailAddon.channelInit();
-        oQuailAddon.workerRefresh();
+        oQuailAddon.workerRefresh(0);
         this.postMessage("init", [oQuailAddon.panelPort]);
     }
 });
@@ -265,13 +290,13 @@ var quailTool = new Tool(
 });
 
 // If new tab is loaded refreshes worker
-sdkTabs.on( 'ready', function()
+sdkTabs.on( 'ready', function( tab )
 {
-    oQuailAddon.workerRefresh();
+    oQuailAddon.workerRefresh( tab );
 });
 
 // If changing tabs refreshes worker
-sdkTabs.on('activate', function()
+sdkTabs.on('activate', function( tab )
 {
-    oQuailAddon.workerRefresh();
+    oQuailAddon.workerRefresh( tab );
 });

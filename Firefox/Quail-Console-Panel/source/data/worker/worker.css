@@ -48,38 +48,3 @@
 .quail-test-overlay-highlight.severe:hover {
     opacity: 0.6;
 }
-
-.quail-test-alert-background {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: black;
-    opacity: 0.25;
-    z-index: 10000;
-}
-.quail-test-alert {
-    text-transform: none;
-    color: black;
-    font-size: 12px;
-    font-family: sans-serif;
-    display: inline-block;
-    width: 200px;
-    min-height: 80px;
-    background-color: #E0E0E0;
-    border: 1px solid #888888;
-    padding: 10px;
-    opacity: 1;
-    position: fixed;
-    top: 20%;
-    left: 50%;
-    transform: translate(-50%);
-    z-index: 10001;
-    text-align: center;
-}
-.quail-test-alert span {
-    display: block;
-    background-color: #b3b3b3;
-    font-weight: bold;
-}

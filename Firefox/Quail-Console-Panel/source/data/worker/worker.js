@@ -292,15 +292,10 @@ var oTestWorker =
                 }
             }
         }
-        if ( iInvisTotal > 0 && $(' .quail-test-alert ').length === 0 )
+        if ( iInvisTotal > 0 )
         {
-            $('body').append("<div class='quail-test-alert-background'></div>");
-            $('body').append("<div class='quail-test-alert'><span>Quail Console Notification</span> " + iInvisTotal + " total elements were not visible and therefore not highlighted<br><br>(Click to remove this notification)</div>");
-            $( '.quail-test-alert' ).click( function()
-            {
-                $(this).remove();
-                $('.quail-test-alert-background').remove();
-            });
+            var sAlert = iInvisTotal + " total elements were not visible and therefore not highlighted ";
+            self.port.emit( "panelAlert", sAlert );
         }
         worker.initToolTips();
     },

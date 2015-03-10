@@ -294,7 +294,7 @@ var oTestWorker =
         }
         if ( iInvisTotal > 0 )
         {
-            var sAlert = iInvisTotal + " total elements were not visible and therefore not highlighted ";
+            var sAlert = iInvisTotal + " total elements could not be highlighted due to visibility";
             self.port.emit( "panelAlert", sAlert );
         }
         worker.initToolTips();

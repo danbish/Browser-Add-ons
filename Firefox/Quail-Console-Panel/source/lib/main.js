@@ -4,6 +4,7 @@ const { Panel } = require( 'dev/panel' );
 const { Class } = require( 'sdk/core/heritage' );
 const { Tool } = require( 'dev/toolbox' );
 const { MessageChannel } = require( 'sdk/messaging' );
+const popupPanel = require( 'sdk/panel' );
 // const oStorage = require('sdk/simple-storage');
 
 const sdkTabs = require( 'sdk/tabs' );
@@ -34,6 +35,7 @@ var oQuailAddon =
     panelPort: {},
     oWorker: {},
     bInitWorker: true,
+    helpPopup: {},
     bTestable: false, // only true when tab is a testable web page, set in worker refresh
     //List of tests that are currently being highlighted
     aActiveList: {},
@@ -42,7 +44,7 @@ var oQuailAddon =
     //Initialize the addon
     addonInit: function()
     {
-        // var thisP = this;
+        var thisP = this;
         // if( oStorage.storage.bStored )
         // {
         //     console.log("Grabbing tests from local storage");
@@ -54,6 +56,17 @@ var oQuailAddon =
         //     console.log("Grabbing tests from server");
             this.messagePanel( 'getTests',[] );
         // }
+        this.helpPopup = popupPanel.Panel(
+        {
+            contentURL: data.url( 'help/help.html' ),
+            contentScriptFile: data.url( 'help/help.js' ),
+            position: { top: 40, right: 40, bottom: 40, left: 40 }
+        });
+        this.helpPopup.hide();
+        this.helpPopup.port.on( "close", function()
+        {
+            thisP.helpPopup.hide();
+        });
     },
     //Initialize worker function
     workerInit: function()
@@ -193,6 +206,10 @@ var oQuailAddon =
                 console.log("Get HTML");
                 this.oWorker.port.emit( "getCode", oDomPosition);
                 break;
+            case 'help':
+            // Open help panel
+                thisP.helpPopup.show();
+                break;
             default:
                 console.error('No matching message handle');
         }
@@ -235,6 +252,7 @@ var oQuailAddon =
         {
             thisO.oWorker.destroy();
             oQuailAddon.workerInit();
+            thisO.messagePanel( "workerReset", [] );
         }
     },
     channelInit: function()

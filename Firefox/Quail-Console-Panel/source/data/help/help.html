@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Quail JS Accessibility Console Plugin</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="help.css">
+</head>
+<body>
+    <span id="close" href="#"></span>
+    <div>
+        <img id="quail" src="imgs/quail.png">
+        <h1>Quail Tests Panel Help</h1>
+        <h3>Getting Started</h3>
+        <p>
+            To begin using the plugin hit <i>Ctrl Shift I</i> to open the console tool box and look for the "Quail Tests" tab.
+            <br>Or, if you prefer, right click anywhere on a web page and hit "Inspect Element".
+        </p>
+        <img src="imgs/1.png">
+        <h3>Begin Testing</h3>
+        <p>
+            Within the "Quail Tests" tab, make sure the "Test" tab is displayed. 
+            <br>Select at least one of the groups of standard you wish to test, e.g. <i>WCAG Tests</i>.
+        </p>
+        <h4>Custom Test Scope</h4>
+        <p>
+            If you want to run the test only on a certain part of the web page, simply enter the jquery location into the <i>Custom Scope</i> input to limit the scope of the test.
+        </p>
+        <img src="imgs/2.png">
+        <p>
+            Once you have selected which standards you wish to test with and the scope of the test, simply click the red <i>Run Test</i> button.
+            <br>Doing so will begin the testing and the loading icon will appear.
+        </p>
+        <img src="imgs/2.png">
+        <h3>Test Results</h3>
+        <p>
+            After the testing is complete the "Report" tab will be opened automatically. From this tab you can explore the results of the test.
+            <br>The total number of fails that occured will be listed in the top left, with the severity totals listed to the right. Use this to quickly judge the outcome of the test.
+            <br>You can also generate a more detailed version of this report using the <i>Generate Report</i> button.
+        </p>
+        <img src="imgs/3.png">
+        <p>
+            Each result entity lists the relevant standard, a description of criteria, a highlight button, and an inspect button. Use these results to fix the accessibility problems your webpage may have.
+            <br>Use the <i>Highlight</i> button to have all the elements that failed highlighted on the page. If there is an element that is unable to be highlighted for some reason the plugin will alert you.
+            <br>Should you want to look more closely at the elements that failed to meet a criteria, click the <i>Inspect</i> button. 
+            <br>This will bring up a new tab that has the each element listed out as it's dom hierarchy (e.g. <i>body > .class > div#id > p</i>) sorted by the specific test failed.
+        </p>
+        <img src="imgs/4.png">
+        <p>
+            This allows you to determine the exact location in the DOM where the tests have deemed the web page un-accessible. 
+            <br>You can also click the <i>View HTML</i> button to view a snippet of the HTML for that node.
+        </p>
+    </div>
+</body>
+</html>

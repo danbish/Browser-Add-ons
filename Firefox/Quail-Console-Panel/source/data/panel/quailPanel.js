@@ -3,6 +3,7 @@
 var oQuailPanel = 
 {
     tempDescript: 'This is a temporary descript to be used to fill up standard descriptions before I transcribe the whole shebang',
+    $Loader: {},
     // oAccessibilityTests holds the object containing the list of quail accessibility tests
     //that will be filled using an ajax call
     oAccessibilityTests: {},
@@ -25,6 +26,8 @@ var oQuailPanel =
             thisP.handleMessage( event.data );
             thisP.mainPort.onmessage = thisP.receiveMessage;
         } );
+
+        thisP.$Loader = $( '.loading' );
         
         // Upon clicking of one the tabs, allows being able to switch to said tab
         $( '.tab-links span' ).on( 'click', function( event )  
@@ -46,7 +49,11 @@ var oQuailPanel =
         $( '.menu-button' ).on( 'click', function(  ) 
         {
             thisP.handleMainButton( $( this ) );
-        } );        
+        } );
+        $( '.help' ).on( 'click', function()
+        {
+            thisP.messageAddon( "help", [] );
+        });   
     },
     /* getAccessibilityTests:
     * the list of accessibiility tests exists in accessibilityTests.js, which is sourced in the 
@@ -112,6 +119,7 @@ var oQuailPanel =
         $( '.results-totals.total-suggestion' ).html( 'Suggestions: ' + oResults.totals.suggestion );
         // Populates results list with each test in results object that has at least one failure
         $( '.results-list' ).html( "" );
+        $( '.results-list.sug' ).append( '<h4>Javascript Related Tests</h4>' );
         for( var sTestId in oResults.results )
         {
             var thisTest = oResults.results[sTestId];
@@ -142,7 +150,7 @@ var oQuailPanel =
                 }
             }
         }
-        $( '.loading' ).hide();
+        thisP.$Loader.hide();
         $( '.results-init' ).hide();
         $( '.results-list' ).show();
         // Change/remove current tab to active
@@ -173,7 +181,7 @@ var oQuailPanel =
             var sStandard = $button.parent().attr('data-standard');
             var aTestIds = thisP.oReportData[sStandard].aTestIds;
             thisP.messageAddon(  "findInDom", [aTestIds]  );
-            $( '.loading' ).show(  );
+            thisP.$Loader.show(  );
         } );
         // Catches anchors within the results list and makes them open new tab in browser instead of opening page in panel
         $( '.results-list a' ).on(  'click', function( e )
@@ -232,7 +240,7 @@ var oQuailPanel =
             // Show tab
             $( '#tabDOM' ).addClass( 'active' ).siblings(  ).removeClass( 'active' );
         });
-        $( '.loading' ).hide();
+        thisP.$Loader.hide();
     },
 
     /*
@@ -309,6 +317,9 @@ var oQuailPanel =
                     var sAlert = oData[0];
                     thisP.alertPanel( sAlert );
                     break;
+                case 'workerReset':
+                    thisP.workerReset();
+                    break;
                 default: //incorrect handler, sends a message to main addon to log this message
                     thisP.messageAddon( "log", ['No matching message handle'] );
             }
@@ -332,7 +343,7 @@ var oQuailPanel =
                 sCustomSelector = $( '#inputCustomScope' ).val(  );
             }
             thisP.messageAddon(  "submit" , [aGuideline, sCustomSelector]  );
-            $( '.loading' ).show(  );
+            thisP.$Loader.show(  );
         }
         else if(  $button.hasClass( 'disable-img' )  )
         {
@@ -357,14 +368,23 @@ var oQuailPanel =
     },
     alertPanel: function( sAlert )
     {
-        $( '.loading' ).hide();
+        this.$Loader.hide();
         var $alert = $( '.panel-alert' );
-        $alert.html( sAlert + '<span class="close"></span>');
-        $( '.panel-alert .close' ).on('click', function()
+        $alert.html( sAlert + '<span class="close"></span>' );
+        $( '.panel-alert .close' ).on( 'click', function()
         {
             $alert.slideUp();
         });
         $alert.slideDown();
+    },
+    workerReset: function()
+    {
+        var thisP = this;
+        this.$Loader.hide();
+        if( $('.results').hasClass('active'))
+        {
+            thisP.alertPanel( 'Warning: Inspections and Highlighting no longer available' );
+        }
     },
     /*
     * BELOW HERE ARE SOME HELPER FUNCTIONS TO MAKE LIFE EASIER
@@ -420,7 +440,14 @@ var oQuailPanel =
             sNewListItem = sNewListItem + '<a class="results-button left" href="http://quailjs.org/#/guidelines/wcag">' + sStandard + '</a>';
             sNewListItem = sNewListItem + '<span class="results-button left hl">Highlight</span><span class="results-button right inspect">Inspect</span>';
             sNewListItem = sNewListItem + '<p>' + thisP.oAccessibilityStandards[sStandard] + '<span class="results-num-ele">' + thisTest.elements.length + ' elements</span></p></div>'
-            $( '.results-list' ).append( sNewListItem );
+            if( thisP.oAccessibilityStandards[sStandard].indexOf('script') === -1 )
+            {
+                $( '.results-list.sev' ).append( sNewListItem );
+            }
+            else
+            {
+                $( '.results-list.sug' ).append( sNewListItem );
+            }
         }
     },
     messageAddon: function(  sMessageHandle, oData  )
